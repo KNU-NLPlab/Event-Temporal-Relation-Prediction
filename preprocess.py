@@ -1,14 +1,14 @@
-
+# -*- coding:utf-8 -*-
 import json
 import os
 import sys
-
-
+import random
 
 #fout = open('top_test_all_data_emb200.txt','w')
-fout = open(sys.argv[2],'w')
+fout = open(sys.argv[3],'w')
 ignore_cnt = 0
 all_cnt = 0
+
 def search(dirname):
     global all_cnt
     global ignore_cnt
@@ -64,7 +64,37 @@ def search(dirname):
     except PermissionError:
         print ('permissionerror')
         pass
+    
+def main(inPath, outPath) :
+        for path, dic, files in os.walk(inPath) :
+                for file in files :
+                        tmpdic = []
+
+                        with open(path + file, 'r', encoding='utf-8') as f :
+                                tmpdic = json.loads(f.read())
+
+                        sentList = []
+                        for tlink in tmpdic['tlink'] :
+                                tset = []
+                                for ele in tlink:
+                                        word = []
+                                        word+=ele['entity']
+                                        word+=ele['wordembedding']
+                                        word+=ele['POS']
+                                        word+=ele['dp']
+
+                                        tset.append(word)
+                                sentList.append(tset)
+
+                        for idx, tset in enumerate(sentList) :
+                                _file = file.split('.txt')[0] + '-' + str(idx) + '.txt'
+                                with open(outPath + _file, 'w', encoding = 'utf-8') as f:
+                                        for word in tset :
+                                                for ele in word:
+                                                        f.write(str(ele)+' ')
+                                                f.write('\n')
 #search("/shared/emb200_full/etTestData/")
-search(sys.argv[1])
+main(sys.argv[1], sys.argv[2])
+search(sys.argv[2])
 print ('all',all_cnt)
 print ('ignore', ignore_cnt)
